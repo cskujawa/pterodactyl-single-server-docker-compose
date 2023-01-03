@@ -159,6 +159,8 @@ This section is just a random hodge-podge list of things I wish were in front of
   Failed to allocate and map port 7777-7777: Error starting userland proxy: listen tcp4 12.34.56.78:7777: bind: cannot assign requested address"
   ```
   When using 127.0.0.1 the server started and looked fully functional through the panel but was inaccessible from anywhere.
+- I have my A records for the panel and wings subdomains routed to the same server.
+- If you use UFW, ensure the docker containers can communicate with each other and the wings containers, and make sure the ports game servers need to access are open as well.
 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
