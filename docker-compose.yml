@@ -1,0 +1,138 @@
+version: "3.7"
+
+volumes:
+  db-data: {}
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    command: --innodb_buffer_pool_size=5M --innodb_log_buffer_size=256K --max_connections=10 --key_buffer_size=8 --thread_cache_size=0 --host_cache_size=0 
+    command: --innodb_ft_cache_size=1600000 --innodb_ft_total_cache_size=32000000 --thread_stack=131072 --sort_buffer_size=32K --read_buffer_size=8200
+    command: --read_rnd_buffer_size=8200 --max_heap_table_size=16K --tmp_table_size=1K --bulk_insert_buffer_size=0 --join_buffer_size=128 
+    command: --net_buffer_length=1K --innodb_sort_buffer_size=64K --binlog_cache_size=4K --binlog_stmt_cache_size=4K --performance_schema=off
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+    networks:
+      - pterry
+
+  nginx:
+    image: nginx
+    container_name: nginx
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: ./system/nginx/Dockerfile
+    ports:
+      - 80:80
+      - 443:443
+      - 8083:8083
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+    volumes:
+      - ./system/certbot/conf:/etc/letsencrypt:rw
+      - ./system/certbot/www:/var/www/certbot
+    depends_on:
+      - app
+    networks:
+      - pterry
+      
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    restart: unless-stopped
+    volumes:
+      - ./system/certbot/conf:/etc/letsencrypt:rw
+      - ./system/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - 6379:6379
+    networks:
+      - pterry
+    restart: always
+
+  wings:
+    image: ghcr.io/pterodactyl/wings:v1.11.0
+    container_name: wings
+    env_file:
+      - .env
+    restart: always
+    networks:
+      - pterry
+      - wings0
+    ports:
+      - 2022:2022
+    tty: true
+    environment:
+      TZ: "UTC"
+      WINGS_UID: 988
+      WINGS_GID: 988
+      WINGS_USERNAME: pterodactyl
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/containers/:/var/lib/docker/containers/
+      - /tmp/pterodactyl/:/tmp/pterodactyl/
+      - ./system/certbot/conf/live/good-spiders.com/fullchain.pem:/etc/letsencrypt/live/wings.good-spiders.com/fullchain.pem:ro
+      - ./system/certbot/conf/live/good-spiders.com/privkey.pem:/etc/letsencrypt/live/wings.good-spiders.com/privkey.pem:ro
+      - ./game-servers/wings/data/wings/etc/:/etc/pterodactyl/
+      - ./game-servers/wings/logs:/var/log/pterodactyl/
+      - ./game-servers/wings/data:/data
+      - /var/lib/pterodactyl/:/var/lib/pterodactyl/
+    depends_on:
+      - panel
+
+  panel:
+    image: ghcr.io/pterodactyl/panel:v1.11.2
+    container_name: panel
+    restart: always
+    environment:
+      SERVICE_NAME: panel
+    env_file:
+      - ./game-servers/panel/var/.env
+    networks:
+      - pterry
+    links:
+      - db
+      - redis
+    volumes:
+      - ./system/certbot/conf:/etc/letsencrypt
+      - ./game-servers/panel/var:/app/var
+      - ./game-servers/panel/logs/:/app/storage/logs
+      - ./game-servers/panel/nginx/:/etc/nginx/conf.d/
+    depends_on:
+      db:
+        condition: service_healthy
+
+networks:
+  local:
+    external: false
+  pterry:
+    name: pterry
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 172.30.0.1/16
+         gateway: 172.30.0.1
+  wings0:
+    name: wings0
+    driver: bridge
+    ipam:
+      config:
+        - subnet: "172.21.0.0/16"
+    driver_opts:
+      com.docker.network.bridge.name: wings0

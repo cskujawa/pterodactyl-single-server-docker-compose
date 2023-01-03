@@ -1,0 +1,104 @@
+debug: false
+app_name: Pterodactyl
+uuid: aaaaaaaaaaaaaaa
+token_id: aaaaaaaaaaaa
+token: aaaaaaaaaaaaaaaaaaaaaaa
+api:
+  host: 0.0.0.0
+  port: 8083
+  ssl:
+    enabled: false
+    cert: /etc/letsencrypt/live/wings.example.com/fullchain.pem
+    key: /etc/letsencrypt/live/wings.example.com/privkey.pem
+  disable_remote_download: false
+  upload_limit: 100
+  trusted_proxies:
+  - 172.30.0.1/16
+system:
+  root_directory: /var/lib/pterodactyl
+  log_directory: /var/log/pterodactyl
+  data: /var/lib/pterodactyl/volumes
+  archive_directory: /var/lib/pterodactyl/archives
+  backup_directory: /var/lib/pterodactyl/backups
+  tmp_directory: /tmp/pterodactyl
+  username: pterodactyl
+  timezone: UTC
+  user:
+    rootless:
+      enabled: false
+      container_uid: 0
+      container_gid: 0
+    uid: 988
+    gid: 988
+  disk_check_interval: 150
+  activity_send_interval: 60
+  activity_send_count: 100
+  check_permissions_on_boot: true
+  enable_log_rotate: true
+  websocket_log_count: 150
+  sftp:
+    bind_address: 0.0.0.0
+    bind_port: 2022
+    read_only: false
+  crash_detection:
+    enabled: true
+    detect_clean_exit_as_crash: true
+    timeout: 60
+  backups:
+    write_limit: 0
+    compression_level: best_speed
+  transfers:
+    download_limit: 0
+docker:
+  network:
+    interface: 172.18.0.1
+    dns:
+    - 1.1.1.1
+    - 1.0.0.1
+    name: pterodactyl_nw
+    ispn: false
+    driver: bridge
+    network_mode: pterodactyl_nw
+    is_internal: false
+    enable_icc: true
+    network_mtu: 1500
+    interfaces:
+      v4:
+        subnet: 172.18.0.0/16
+        gateway: 172.18.0.1
+      v6:
+        subnet: fdba:17c8:6c94::/64
+        gateway: fdba:17c8:6c94::1011
+  domainname: ""
+  registries: {}
+  tmpfs_size: 100
+  container_pid_limit: 512
+  installer_limits:
+    memory: 1024
+    cpu: 100
+  overhead:
+    override: false
+    default_multiplier: 1.05
+    multipliers: {}
+  use_performant_inspect: true
+  userns_mode: ""
+  log_config:
+    type: local
+    config:
+      compress: "false"
+      max-file: "1"
+      max-size: 5m
+      mode: non-blocking
+throttles:
+  enabled: true
+  lines: 2000
+  line_reset_interval: 100
+remote: https://panel.example.com
+remote_query:
+  timeout: 30
+  boot_servers_per_page: 50
+allowed_mounts: []
+allowed_origins:
+- https://panel.example.com
+- https://172.30.0.1/16
+allow_cors_private_network: true

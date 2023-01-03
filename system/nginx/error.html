@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title><!--# echo var="status_text" default="Something went wrong" --></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--# if expr="$status = 502" -->
+      <meta http-equiv="refresh" content="2">
+    <!--# endif -->
+  </head>
+<body>
+  <h1><!--# echo var="status" default="" --> <!--# echo var="status_text" default="Something went wrong" --></h1>
+</body>
+</html>
