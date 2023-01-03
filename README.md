@@ -6,13 +6,9 @@
       <a href="#about-the-project">About The Project</a>
       <ul>
         <li><a href="#built-with">Built With</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#ubuntu-server-setup">Ubuntu Server Guide</a></li>
-        <li><a href="#wsl-setup">WSL Guide</a></li>
+        <li><a href="#disclaimerh">Disclaimer</a></li>
+        <li><a href="#file-descriptions">File Descriptions</a></li>
+        <li><a href="#hurdles-&-notes">Hurdles & Notes</a></li>
       </ul>
     </li>
     <li>
