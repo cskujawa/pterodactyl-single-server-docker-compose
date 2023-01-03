@@ -13,7 +13,7 @@ Dry runs for the script require the ./system/certbot/conf folder to exist. To re
 Always test with staging set to 1. If it succeeds, then change back to 0.
 
 The Dockerfile for this server extends the base image and copys these files over:
-/system/nginx/jarvis.conf
+/system/nginx/pterry.conf
 /system/nginx/http.conf
 /system/nginx/nginx.conf
 /system/nginx/ssl.conf
